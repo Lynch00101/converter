@@ -1,2 +1,37 @@
+import maya.cmds as cmds
 
-fasfafsa
+# 1. Setup project
+cmds.workspace('Documents/maya2017/c02_tut1', newWorkspace=True)
+cmds.workspace('Documents/maya2017/c02_tut1', openWorkspace=True)
+
+# 2. Base Cylinder
+mug = cmds.polyCylinder(r=3.0, h=5.0, sx=20, sy=5, sc=1, name='mug')[0]
+
+# 3. Shape Base and Rim
+cmds.select('mug.vtx[0:19]', 'mug.vtx[100:119]')
+cmds.scale(0.8, 1, 0.8, r=True)
+cmds.select('mug.vtx[20:39]')
+cmds.scale(1.15, 1, 1.15, r=True)
+
+# 4. Insert Support Loops
+cmds.polySplitRing('mug.e[20]', divisions=1, splitType=0, weight=0.1)
+cmds.polySplitRing('mug.e[80]', divisions=1, splitType=0, weight=0.9)
+
+# 5. Hollow out the mug
+top_faces = ['mug.f[%d]' % i for i in range(100, 120)]
+cmds.polyExtrudeFacet(top_faces, inputScale=(0.85, 1, 0.85))
+cmds.polyExtrudeFacet(top_faces, localTranslateZ=-0.3)
+cmds.polyExtrudeFacet(top_faces, localTranslateZ=-1.6)
+cmds.polyExtrudeFacet(top_faces, localTranslateZ=-2.0, inputScale=(0.8, 1, 0.8))
+
+# 6. Build the Handle
+cmds.select('mug.e[50]', 'mug.e[70]')
+cmds.polyBevel(offset=1.0, segments=1)
+cmds.select('mug.f[45]', 'mug.f[65]')
+cmds.polyExtrudeFacet(localTranslateZ=0.8)
+cmds.polyBridgeEdge('mug.f[45]', 'mug.f[65]', divisions=4, bridgeMode=0)
+
+# 7. Smooth and clean up
+cmds.polySmooth('mug', divisions=1, continuity=1.0)
+cmds.select(clear=True)
+print("Your Mug is Ready!")
